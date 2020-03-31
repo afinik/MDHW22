@@ -14,7 +14,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //AnimalViewModel animalViewModel = ViewModelProviders.of(this).get(AnimalViewModel.class);
-        getSupportFragmentManager().beginTransaction()
+        getSupportFragmentManager()
+                .beginTransaction()
                 .replace(R.id.container_portrait,new DataListFragment())
                 .commit();
 

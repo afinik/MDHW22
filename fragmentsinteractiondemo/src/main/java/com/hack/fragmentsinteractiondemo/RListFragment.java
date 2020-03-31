@@ -1,5 +1,6 @@
 package com.hack.fragmentsinteractiondemo;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -11,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,15 +30,23 @@ public class RListFragment extends Fragment {
         // Required empty public constructor
     }
 
-    ArrayList<User> getData(){
-        String[] names = getContext().getResources().getStringArray(R.array.data);
-        ArrayList<User> data = new ArrayList<>();
-        Random rnd = new Random();
-        for(int i=0;i<names.length;++i){
-            data.add(new User(names[i],i+1,rnd.nextBoolean()));
-        }
-        return data;
+
+    public interface ListItemClickListener{
+        public void onListItemClicked(int position, User user);
     }
+    private ListItemClickListener mListener;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if(getActivity() instanceof ListItemClickListener){
+            mListener = (ListItemClickListener) getActivity();
+        } else {
+            throw  new RuntimeException("Host Acivity must implements ListItemClickListener");
+        }
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -43,17 +54,21 @@ public class RListFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_r_list, container, false);
         RecyclerView recyclerView = v.findViewById(R.id.rc_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
-        MyAdapter adapter = new MyAdapter(getData());
+        MyApp myApp = (MyApp) getContext().getApplicationContext();
+        MyAdapter adapter = new MyAdapter(myApp.getData(), mListener);
         recyclerView.setAdapter(adapter);
         return v;
     }
 
     class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
-
+        private ListItemClickListener mListener;
         ArrayList<User> mData;
+        int rowIndex = -1;
 
-        public MyAdapter(ArrayList<User> data) {
+        OnItemClickListener listener;
+        public MyAdapter(ArrayList<User> data, ListItemClickListener listItemClickListener) {
             mData = data;
+            mListener = listItemClickListener;
         }
 
         @NonNull
@@ -76,14 +91,33 @@ public class RListFragment extends Fragment {
             holder.imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mData.get(position).selected) {
+                    MyAdapter.this.notifyItemChanged(rowIndex);
+                    rowIndex = position;
+                    listener.onItemClick(position, mData.get(position));
+                   /* if (mData.get(position).selected) {
                         holder.tv_name.setBackgroundColor(Color.RED);
                     } else {
                         holder.tv_name.setBackgroundColor(Color.BLUE);
-                    }
-                    mData.get(position).selected = !mData.get(position).selected;
+                    }*/
+                    /*mData.get(position).selected = !mData.get(position).selected;*/
+                    holder.tv_name.setBackgroundColor(Color.RED);
                 }
             });
+
+            holder.tv_name.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    if (position != 0){
+                        holder.tv_name.setBackgroundColor(Color.BLUE);
+                    } else {
+                        holder.tv_name.setBackgroundColor(Color.WHITE);
+                    }
+                    mListener.onListItemClicked(position, mData.get(position));
+                }
+            });
+
+
         }
 
         @Override
@@ -102,6 +136,11 @@ public class RListFragment extends Fragment {
                 imageView = itemView.findViewById(R.id.iv_logo);
             }
         }
+    }
+
+
+    public interface OnItemClickListener{
+        void onItemClick(int position, User data);
     }
 
 }

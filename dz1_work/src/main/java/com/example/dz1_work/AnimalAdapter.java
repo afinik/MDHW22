@@ -32,6 +32,7 @@ public class AnimalAdapter extends RecyclerView.Adapter<AnimalAdapter.AnimalView
     }
     void setData(List<Animal> animals){
         this.animals = animals;
+        //Доходит до этого момента - добавление нового пункта
         notifyDataSetChanged();
     }
     @NonNull
@@ -51,6 +52,7 @@ public class AnimalAdapter extends RecyclerView.Adapter<AnimalAdapter.AnimalView
                 AnimalAdapter.this.notifyItemChanged(rowIndex);
                 rowIndex = position;
                 listener.onItemClick(position,animals.get(position));
+                //после выбора пункта меню когда загорится красным
                 holder.itemView.setBackgroundColor(Color.RED);
             }
         });
