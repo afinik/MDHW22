@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
             String dataMarkets = (String) msg.obj;
             if (tv_dataFromMarkets != null){
                 tv_dataFromMarkets.setText(dataMarkets);
+
             }
         }
     };
